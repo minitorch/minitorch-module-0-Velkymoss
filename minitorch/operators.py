@@ -36,10 +36,12 @@ def mul(a: float, b: float) -> float:
     """Multiplies two floating-point numbers.
 
     Args:
+    ----
         a (float): The first number to multiply
         b (float): The second number to multiply
 
     Returns:
+    -------
         float: The product of a and b
 
     """
@@ -69,13 +71,16 @@ def add(a: float, b: float) -> float:
     """Add two numbers and return the result.
 
     Args:
+    ----
         a (float): First number to add.
         b (float): Second number to add.
 
     Returns:
+    -------
         float: The sum of a and b.
 
     Examples:
+    --------
         >>> add(3.0, 4.0)
         7.0
         >>> add(-2.0, 2.0)
@@ -90,12 +95,15 @@ def neg(a: float) -> float:
     """Negate a number.
 
     Args:
+    ----
         a (float): The number to negate.
 
     Returns:
+    -------
         float: The negation of the input number, which is -a.
 
     Examples:
+    --------
         >>> neg(5)
         -5
         >>> neg(-2)
@@ -110,10 +118,12 @@ def lt(a: float, b: float) -> bool:
     """Compares two floating-point numbers and returns True if they are not equal.
 
     Args:
+    ----
         a (float): The first number to compare.
         b (float): The second number to compare.
 
     Returns:
+    -------
         bool: True if a is greater than b or a is less than b (i.e., a != b), otherwise False.
 
     """
@@ -127,10 +137,12 @@ def eq(a: float, b: float) -> bool:
     """Compares two floating-point numbers for equality.
 
     Args:
+    ----
         a (float): The first number to compare.
         b (float): The second number to compare.
 
     Returns:
+    -------
         bool: True if both numbers are equal, False otherwise.
 
     """
@@ -144,10 +156,12 @@ def max(a: float, b: float) -> float:
     """Returns the maximum of two float values.
 
     Args:
+    ----
         a (float): The first value to compare.
         b (float): The second value to compare.
 
     Returns:
+    -------
         float: The greater of the two input values. If both are equal, returns `a`.
 
     """
@@ -163,10 +177,12 @@ def is_close(a: float, b: float) -> bool:
     """Test if two floating point numbers are close.
 
     Args:
+    ----
         a: First floating point number
         b: Second floating point number
 
     Returns:
+    -------
         True if the distance between a and b is less than 1e-2, False otherwise.
 
     """
@@ -188,9 +204,11 @@ def sigmoid(x: float) -> float:
     - For x < 0: e^x / (1 + e^x)
 
     Args:
+    ----
         x: A floating point value
 
     Returns:
+    -------
         The sigmoid of x
 
     """
@@ -204,9 +222,11 @@ def relu(x: float) -> float:
     """Applies the rectified linear unit (ReLU) activation function.
 
     Args:
+    ----
         x (float): Input value.
 
     Returns:
+    -------
         float: The input value if it is greater than 0, otherwise 0.
 
     """
@@ -217,12 +237,15 @@ def log(x: float) -> float:
     """Computes the natural logarithm of a given number.
 
     Args:
+    ----
         x (float): The input value. Must be greater than 0.
 
     Returns:
+    -------
         float: The natural logarithm of x.
 
     Raises:
+    ------
         ValueError: If x is less than or equal to 0.
 
     """
@@ -233,12 +256,15 @@ def exp(x: float) -> float:
     """Implementation of the exponential function.
 
     Args:
+    ----
         x (float): The input value.
 
     Returns:
+    -------
         float: The exponential of the input, e^x.
 
     Examples:
+    --------
         >>> exp(0.0)
         1.0
         >>> exp(1.0)
@@ -252,10 +278,12 @@ def log_back(x: float, grad: float) -> float:
     """Computes the gradient of the natural logarithm function with respect to its input.
 
     Args:
+    ----
         x (float): The input value to the logarithm function.
         grad (float): The gradient of the subsequent operation (upstream gradient).
 
     Returns:
+    -------
         float: The gradient of the logarithm function with respect to x, multiplied by the upstream gradient.
 
     """
@@ -266,12 +294,15 @@ def inv(x: float) -> float:
     """Returns the multiplicative inverse of a given number.
 
     Args:
+    ----
         x (float): The number to invert.
 
     Returns:
+    -------
         float: The multiplicative inverse of x (i.e., 1/x).
 
     Raises:
+    ------
         ZeroDivisionError: If x is zero.
 
     """
@@ -289,10 +320,12 @@ def inv_back(x: float, grad: float) -> float:
     multiplied by the upstream gradient.
 
     Args:
+    ----
         x (float): The input value to the inverse function.
         grad (float): The upstream gradient from the next layer.
 
     Returns:
+    -------
         float: The computed gradient with respect to `x`.
 
     """
@@ -303,10 +336,12 @@ def relu_back(x: float, grad: float) -> float:
     """Computes the gradient of the ReLU activation function with respect to its input.
 
     Args:
+    ----
         x (float): The input value to the ReLU function.
         grad (float): The gradient of the loss with respect to the output of the ReLU.
 
     Returns:
+    -------
         float: The gradient of the loss with respect to the input of the ReLU.
                Returns `grad` if `x > 0`, otherwise returns 0.
 
