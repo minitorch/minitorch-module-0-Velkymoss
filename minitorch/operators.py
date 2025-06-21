@@ -1,6 +1,7 @@
 """Collection of the core mathematical operators used throughout the code base."""
 
 import math
+from typing import Callable, Iterable
 
 # ## Task 0.1
 
@@ -115,16 +116,14 @@ def neg(a: float) -> float:
 
 
 def lt(a: float, b: float) -> bool:
-    """Compares two floating-point numbers and returns True if they are not equal.
+    """Compares two floating-point numbers and returns True if the first is less than the second.
 
     Args:
-    ----
         a (float): The first number to compare.
         b (float): The second number to compare.
 
     Returns:
-    -------
-        bool: True if a is greater than b or a is less than b (i.e., a != b), otherwise False.
+        bool: True if a is less than b, otherwise False.
 
     """
     if a < b:
@@ -367,31 +366,165 @@ def relu_back(x: float, grad: float) -> float:
 # - sum: sum lists
 # - prod: take the product of lists
 
-
 # TODO: Implement for Task 0.3.
-def map(fn, iterable):
-    pass
 
 
-def zipWith(fn, list1, list2):
-    pass
+def map(fn: Callable[[float], float]) -> Callable[[Iterable[float]], Iterable[float]]:
+    """Creates a higher-order function that applies a given unary function to each element of an iterable.
+
+    Args:
+        fn (Callable[[float], float]): A function that takes a float and returns a float.
+
+    Returns:
+        Callable[[Iterable[float]], Iterable[float]]: A function that takes an iterable of floats and returns a list of floats,
+        where each element is the result of applying `fn` to the corresponding element in the input iterable.
+
+    Example:
+        >>> square = lambda x: x * x
+        >>> map_fn = map(square)
+        >>> map_fn([1.0, 2.0, 3.0])
+        [1.0, 4.0, 9.0]
+
+    """
+
+    def apply(container: Iterable[float]) -> list[float]:
+        ret = []
+        for x in container:
+            ret.append(fn(x))
+        return ret
+
+    return apply
 
 
-def reduce(fn, iterable, initial=None):
-    pass
+def zipWith(
+    fn: Callable[[float, float], float],
+) -> Callable[[Iterable[float], Iterable[float]], Iterable[float]]:
+    """Applies a binary function to pairs of elements from two iterables, returning a list of results.
+
+    Args:
+        fn (Callable[[float, float], float]): A function that takes two floats and returns a float.
+
+    Returns:
+        Callable[[Iterable[float], Iterable[float]], list[float]]:
+            A function that takes two iterables of floats and returns a list of floats,
+            where each element is the result of applying `fn` to the corresponding elements
+            from the input iterables. Iteration stops when the shortest iterable is exhausted.
+
+    Example:
+        >>> add = lambda x, y: x + y
+        >>> zip_add = zipWith(add)
+        >>> zip_add([1.0, 2.0, 3.0], [4.0, 5.0, 6.0])
+        [5.0, 7.0, 9.0]
+
+    """
+
+    def apply(
+        container_1: Iterable[float], container_2: Iterable[float]
+    ) -> list[float]:
+        res = []
+        c1_iter = iter(container_1)
+        c2_iter = iter(container_2)
+
+        while True:
+            try:
+                x = next(c1_iter)
+                y = next(c2_iter)
+                res.append(fn(x, y))
+            except StopIteration:
+                break
+        return res
+
+    return apply
 
 
-def addLists(list1, list2):
-    pass
+def reduce(
+    fn: Callable[[float, float], float], start: float
+) -> Callable[[Iterable[float]], float]:
+    """Creates a reduction function that applies a binary operation cumulatively to the items of an iterable, from left to right, starting with a given initial value.
+
+    Args:
+        fn (Callable[[float, float], float]): A binary function that takes two floats and returns a float. This function is applied cumulatively to the items of the iterable.
+        start (float): The initial value to start the reduction.
+
+    Returns:
+        Callable[[Iterable[float]], float]: A function that takes an iterable of floats and returns the reduced value as a float.
+
+    Example:
+        >>> add = lambda x, y: x + y
+        >>> sum_reduce = reduce(add, 0)
+        >>> sum_reduce([1, 2, 3, 4])
+        10.0
+
+    """
+
+    def apply(container: Iterable[float]) -> float:
+        res = start
+        for x in container:
+            res = fn(x, res)
+        return res
+
+    return apply
 
 
-def negList(lst):
-    pass
+def negList(array: list[float]) -> Iterable[float]:
+    """Applies the negation operation to each element in the input list.
+
+    Args:
+        array (list[float]): A list of floating-point numbers to be negated.
+
+    Returns:
+        Iterable[float]: An iterable containing the negated values of the input list.
+
+    """
+    mapper = map(neg)
+    return mapper(array)
 
 
-def sum(lst):
-    pass
+def addLists(array_1: list[float], array_2: list[float]) -> Iterable[float]:
+    """Adds two lists of floats element-wise.
+
+    Args:
+        array_1 (list[float]): The first list of floats.
+        array_2 (list[float]): The second list of floats.
+
+    Returns:
+        Iterable[float]: An iterable containing the element-wise sums of the input lists.
+
+    Raises:
+        ValueError: If the input lists are not of the same length.
+
+    """
+    zipper = zipWith(add)
+    return zipper(array_1, array_2)
 
 
-def prod(lst):
-    pass
+def sum(array: list[float]) -> float:
+    """Calculates the sum of all elements in the input list.
+
+    Args:
+        array (list[float]): A list of floating-point numbers to be summed.
+
+    Returns:
+        float: The sum of all elements in the input list.
+
+    """
+    reducer = reduce(add, 0)
+    return reducer(array)
+
+
+def prod(array: list[float]) -> float:
+    """Calculates the product of all elements in the input list.
+
+    Args:
+        array (list[float]): A list of floating-point numbers to multiply together.
+
+    Returns:
+        float: The product of all elements in the list.
+
+    Raises:
+        TypeError: If the input is not a list of floats.
+        ValueError: If the input list is empty.
+
+    """
+    reducer = reduce(mul, 1)
+    return reducer(array)

@@ -22,6 +22,7 @@ from minitorch.operators import (
     prod,
     relu,
     relu_back,
+    sigmoid,
 )
 
 from .strategies import assert_close, small_floats
@@ -107,7 +108,14 @@ def test_sigmoid(a: float) -> None:
     * It is  strictly increasing.
     """
     # TODO: Implement for Task 0.2.
-    raise NotImplementedError("Need to implement for Task 0.2")
+
+    value = sigmoid(a)
+
+    assert 0 <= value <= 1
+    assert 1 - value == pytest.approx(sigmoid(-a))
+    assert sigmoid(0) == 0.5
+    if -30 < a < 30:
+        assert value < sigmoid(a + 1e-2)
 
 
 @pytest.mark.task0_2
@@ -115,7 +123,8 @@ def test_sigmoid(a: float) -> None:
 def test_transitive(a: float, b: float, c: float) -> None:
     """Test the transitive property of less-than (a < b and b < c implies a < c)"""
     # TODO: Implement for Task 0.2.
-    raise NotImplementedError("Need to implement for Task 0.2")
+    if lt(a, b) and lt(b, c):
+        assert lt(a, c)
 
 
 @pytest.mark.task0_2
@@ -124,7 +133,7 @@ def test_symmetric() -> None:
     gives the same value regardless of the order of its input.
     """
     # TODO: Implement for Task 0.2.
-    raise NotImplementedError("Need to implement for Task 0.2")
+    assert mul(0.5, -0.3) == mul(-0.3, 0.5)
 
 
 @pytest.mark.task0_2
@@ -133,14 +142,18 @@ def test_distribute() -> None:
     :math:`z \times (x + y) = z \times x + z \times y`
     """
     # TODO: Implement for Task 0.2.
-    raise NotImplementedError("Need to implement for Task 0.2")
+    z = 2
+    x = 0.3
+    y = -0.6
+    assert mul(z, add(x, y)) == add(mul(z, x), mul(z, y))
 
 
 @pytest.mark.task0_2
-def test_other() -> None:
+def test_inv_zero_division_error() -> None:
     """Write a test that ensures some other property holds for your functions."""
     # TODO: Implement for Task 0.2.
-    raise NotImplementedError("Need to implement for Task 0.2")
+    with pytest.raises(ZeroDivisionError):
+        inv(0)
 
 
 # ## Task 0.3  - Higher-order functions
@@ -168,7 +181,9 @@ def test_sum_distribute(ls1: List[float], ls2: List[float]) -> None:
     is the same as the sum of each element of `ls1` plus each element of `ls2`.
     """
     # TODO: Implement for Task 0.3.
-    raise NotImplementedError("Need to implement for Task 0.3")
+    left_side = minitorch.operators.sum(ls1) + minitorch.operators.sum(ls2)
+    right_side = minitorch.operators.sum(list(addLists(ls1, ls2)))
+    assert_close(left_side, right_side)
 
 
 @pytest.mark.task0_3
