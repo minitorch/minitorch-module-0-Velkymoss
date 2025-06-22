@@ -62,12 +62,40 @@ class Module:
 
         """
         # TODO: Implement for Task 0.4.
-        raise NotImplementedError("Need to implement for Task 0.4")
+        parameters = list(self._parameters.items())
+
+        que = deque(self._modules.items())
+        path = []
+
+        while que:
+            module_name, node = que.popleft()
+
+            path.append(module_name)
+
+            named_parameters = [
+                (".".join(path) + "." + name, parameter)
+                for name, parameter in node._parameters.items()
+            ]
+
+            parameters.extend(named_parameters)
+
+            if node._modules:
+                que.extendleft(node._modules.items())
+            else:
+                path = []
+
+        return parameters
 
     def parameters(self) -> Sequence[Parameter]:
         """Enumerate over all the parameters of this module and its descendents."""
         # TODO: Implement for Task 0.4.
-        raise NotImplementedError("Need to implement for Task 0.4")
+        parameters = list(self._parameters.values())
+        que = deque(self._modules.values())
+        while que:
+            node = que.popleft()
+            que.extend(node._modules.values())
+            parameters.extend(node._parameters.values())
+        return parameters
 
     def add_parameter(self, k: str, v: Any) -> Parameter:
         """Manually add a parameter. Useful helper for scalar parameters.
@@ -161,71 +189,3 @@ class Parameter:
 
     def __str__(self) -> str:
         return str(self.value)
-
-
-if __name__ == "__main__":
-    # Test boilerplate for creating a module tree
-
-    # Create leaf modules (no children)
-    leaf1 = Module()
-    leaf2 = Module()
-    leaf3 = Module()
-    leaf4 = Module()
-
-    # Create intermediate modules
-    intermediate1 = Module()
-    intermediate1._modules["leaf1"] = leaf1
-    intermediate1._modules["leaf2"] = leaf2
-
-    intermediate2 = Module()
-    intermediate2._modules["leaf3"] = leaf3
-    intermediate2._modules["leaf4"] = leaf4
-
-    # Create root module
-    root = Module()
-    root._modules["branch1"] = intermediate1
-    root._modules["branch2"] = intermediate2
-
-    # Test the tree structure
-    print("Module tree structure:")
-    print(f"Root has {len(root._modules)} children")
-    print(f"Branch1 has {len(intermediate1._modules)} children")
-    print(f"Branch2 has {len(intermediate2._modules)} children")
-
-    # Test training mode before calling train()
-    print("\nBefore calling train():")
-    print(f"Root training: {root.training}")
-    print(f"Branch1 training: {intermediate1.training}")
-    print(f"Branch2 training: {intermediate2.training}")
-    print(f"Leaf1 training: {leaf1.training}")
-    print(f"Leaf2 training: {leaf2.training}")
-    print(f"Leaf3 training: {leaf3.training}")
-    print(f"Leaf4 training: {leaf4.training}")
-
-    # Set some modules to eval mode to test
-    intermediate1.training = False
-    leaf1.training = False
-    leaf3.training = False
-
-    print("\nAfter setting some to False:")
-    print(f"Root training: {root.training}")
-    print(f"Branch1 training: {intermediate1.training}")
-    print(f"Branch2 training: {intermediate2.training}")
-    print(f"Leaf1 training: {leaf1.training}")
-    print(f"Leaf2 training: {leaf2.training}")
-    print(f"Leaf3 training: {leaf3.training}")
-    print(f"Leaf4 training: {leaf4.training}")
-
-    # Now test your train() method
-    root.train()
-
-    print("\nAfter calling root.train():")
-    print(f"Root training: {root.training}")
-    print(f"Branch1 training: {intermediate1.training}")
-    print(f"Branch2 training: {intermediate2.training}")
-    print(f"Leaf1 training: {leaf1.training}")
-    print(f"Leaf2 training: {leaf2.training}")
-    print(f"Leaf3 training: {leaf3.training}")
-    print(f"Leaf4 training: {leaf4.training}")
-
-    # All should be True if your implementation is correct
