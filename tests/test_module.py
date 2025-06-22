@@ -182,3 +182,61 @@ def test_parameter() -> None:
     t2 = MockParam()
     q.update(t2)
     assert t2.x
+
+
+#### additional test for more complex tree for named_parameters
+
+
+class ModuleAA(minitorch.Module):
+    def __init__(self):
+        super().__init__()
+        self.p1 = minitorch.Parameter(1)
+
+
+class ModuleAB(minitorch.Module):
+    def __init__(self):
+        super().__init__()
+        self.p2 = minitorch.Parameter(2)
+
+
+class ModuleBA(minitorch.Module):
+    def __init__(self):
+        super().__init__()
+        self.p3 = minitorch.Parameter(3)
+
+
+class ModuleA(minitorch.Module):
+    def __init__(self):
+        super().__init__()
+        self.aa = ModuleAA()
+        self.ab = ModuleAB()
+
+
+class ModuleB(minitorch.Module):
+    def __init__(self):
+        super().__init__()
+        self.ba = ModuleBA()
+
+
+class RootModule(minitorch.Module):
+    def __init__(self):
+        super().__init__()
+        self.a = ModuleA()
+        self.b = ModuleB()
+
+
+@pytest.mark.task0_4
+def test_complex_named_parameters() -> None:
+    mod = RootModule()
+    np = dict(mod.named_parameters())
+
+    # Should contain exactly these keys
+    expected_keys = {"a.aa.p1", "a.ab.p2", "b.ba.p3"}
+
+    print(np.keys())
+
+    assert set(np.keys()) == expected_keys
+
+    assert np["a.aa.p1"].value == 1
+    assert np["a.ab.p2"].value == 2
+    assert np["b.ba.p3"].value == 3
