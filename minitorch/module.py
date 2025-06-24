@@ -44,7 +44,7 @@ class Module:
             future_nodes = []
 
     def train(self) -> None:
-        """Set the mode of this module and all descendent modules to `eval`.
+        """Set the mode of this module and all descendent modules to `train`.
         
         Traverses tree level by level (BFS)
         """
