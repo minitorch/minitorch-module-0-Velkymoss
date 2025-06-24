@@ -230,7 +230,6 @@ def test_complex_named_parameters() -> None:
     mod = RootModule()
     np = dict(mod.named_parameters())
 
-    # Should contain exactly these keys
     expected_keys = {"a.aa.p1", "a.ab.p2", "b.ba.p3"}
 
     print(np.keys())
@@ -240,3 +239,33 @@ def test_complex_named_parameters() -> None:
     assert np["a.aa.p1"].value == 1
     assert np["a.ab.p2"].value == 2
     assert np["b.ba.p3"].value == 3
+
+
+### test for checking if cycle detection is implemented correctly
+
+
+class ModuleCycleTest(minitorch.Module):
+    def __init__(self) -> None:
+        super().__init__()
+        self.p = minitorch.Parameter(42)
+        self.a = ModuleCycleChild()
+        # Create a cycle: a_cycle points back to this module
+        self.a.a_cycle = self
+
+
+class ModuleCycleChild(minitorch.Module):
+    def __init__(self) -> None:
+        super().__init__()
+        self.p_child = minitorch.Parameter(99)
+
+
+@pytest.mark.task0_4
+def test_cycle_breaks_named_parameters():
+    mod = ModuleCycleTest()
+
+    # If named_parameters lacks cycle detection, this will cause infinite loop or crash
+    np = dict(mod.named_parameters())
+
+    assert np["p"].value == 42
+    assert np["a.p_child"].value == 99
+    assert np["a.a_cycle.p"].value == 42

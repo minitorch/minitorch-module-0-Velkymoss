@@ -30,7 +30,7 @@ class Module:
         m: Dict[str, Module] = self.__dict__["_modules"]
         return list(m.values())
 
-    def train(self) -> None:
+    def train_deprecated(self) -> None:
         """Set the mode of this module and all descendent modules to `train`."""
         # TODO: Implement for Task 0.4.
         self.training = True
@@ -43,8 +43,24 @@ class Module:
             nodes_to_process = future_nodes
             future_nodes = []
 
+    def train(self) -> None:
+        """Set the mode of this module and all descendent modules to `eval`.
+        
+        Traverses tree level by level (BFS)
+        """
+        # TODO: Implement for Task 0.4.
+        self.training = True
+        que = deque(self._modules.values())
+        while que:
+            node = que.popleft()
+            node.training = True
+            que.extend(node._modules.values())
+
     def eval(self) -> None:
-        """Set the mode of this module and all descendent modules to `eval`."""
+        """Set the mode of this module and all descendent modules to `eval`.
+
+        Traverses tree level by level (BFS)
+        """
         # TODO: Implement for Task 0.4.
         self.training = False
         que = deque(self._modules.values())
@@ -53,7 +69,7 @@ class Module:
             node.training = False
             que.extend(node._modules.values())
 
-    def named_parameters(self) -> Sequence[Tuple[str, Parameter]]:
+    def named_parameters_deprecated(self) -> Sequence[Tuple[str, Parameter]]:
         """Collect all the parameters of this module and its descendents.
 
         Returns
@@ -65,24 +81,82 @@ class Module:
         parameters = list(self._parameters.items())
 
         que = deque(self._modules.items())
+
+        # list of lists with module_name, number_of_children + 1 elements
         path = []
 
         while que:
             module_name, node = que.popleft()
 
-            path.append(module_name)
+            # create the module path
+            joined_path = ""
+            if path:
+                path.append([module_name, len(node._modules) + 1])
+                for subpath in path:
+                    joined_path = joined_path + subpath[0] + "."
+            else:
+                path.append([module_name, len(node._modules) + 1])
+                joined_path = path[0][0] + "."
 
+            # at parameter name to module paths
             named_parameters = [
-                (".".join(path) + "." + name, parameter)
+                (joined_path + name, parameter)
                 for name, parameter in node._parameters.items()
             ]
 
+            # update path
+            if path:
+                new_path = []
+                for i in range(len(path)):
+                    path[i][1] -= 1
+
+                    if path[i][1] > 0:
+                        new_path.append(path[i])
+                path = new_path
+
             parameters.extend(named_parameters)
 
-            if node._modules:
-                que.extendleft(node._modules.items())
-            else:
-                path = []
+            # add children to que so they are processed next
+            que.extendleft(node._modules.items())
+
+        return parameters
+
+    def named_parameters(self) -> Sequence[Tuple[str, Parameter]]:
+        """Collect all the parameters of this module and its descendents.
+
+        Traverses tree level by level (BFS)
+
+        Performs cycle detection
+
+        Returns
+        -------
+            The name and `Parameter` of each ancestor parameter.
+
+        """
+        # add parameters of root module
+        parameters = list(self._parameters.items())
+        # que: [(path, Module), ...]
+        que = deque([(name, module) for name, module in self._modules.items()])
+        # keep track of ids of processed Modules
+        visited = set()
+
+        while que:
+            prefix, module = que.popleft()
+
+            # check module id
+            if id(module) in visited:
+                continue
+            visited.add(id(module))
+
+            # add parameters of current modules to parameters
+            for param_name, param in module._parameters.items():
+                full_name = prefix + "." + param_name
+                parameters.append((full_name, param))
+
+            # create path for children and append to que
+            for child_key, child_module in module._modules.items():
+                child_prefix = prefix + "." + child_key
+                que.append((child_prefix, child_module))
 
         return parameters
 
